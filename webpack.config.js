@@ -15,7 +15,12 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.ts?$/,
-          use: "ts-loader",
+          use: {
+            loader: "ts-loader",
+            options: {
+              onlyCompileBundledFiles: true,
+            },
+          },
           exclude: /node_modules/,
         },
       ],
@@ -27,9 +32,9 @@ module.exports = (env, argv) => {
       new HtmlWebpackPlugin({
         template: "index.html",
       }),
-    //   // new MiniCssExtractPlugin({
-    //   //   filename: "styles.[chunkhash].css",
-    //   // }),
+      //   // new MiniCssExtractPlugin({
+      //   //   filename: "styles.[chunkhash].css",
+      //   // }),
       isProd ? new CleanWebpackPlugin() : undefined,
     ].filter((x) => x),
   };

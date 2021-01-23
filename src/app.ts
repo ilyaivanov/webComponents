@@ -1,3 +1,3 @@
-import {foo} from './foo';
+import { init } from "./svgMapCanvas";
 
-console.log(foo())
+init();
