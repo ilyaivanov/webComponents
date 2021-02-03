@@ -1,4 +1,7 @@
 // import { init } from "./svgMapCanvas";
-import { init } from "./cssAnimations/animatingHeight";
+// import { init } from "./cssAnimations/animatingHeight";
+// init();
 
-init();
+import * as sampleButton from "./sampleButton";
+
+sampleButton.render();
