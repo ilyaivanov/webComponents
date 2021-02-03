@@ -1,5 +1,12 @@
 export { cls, ids, ClassName, zIndexes } from "./keys";
-export { cssClass, css, styles, cssText } from "./style";
+export {
+  cssClass,
+  css,
+  styles,
+  cssText,
+  Styles,
+  convertNumericStylesToPixels,
+} from "./style";
 export { div, findFirstByClass, findById, fragment } from "./dom";
 export * as dom from "./dom";
 export * as anim from "./animations";

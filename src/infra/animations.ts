@@ -1,82 +1,18 @@
-import { dom } from ".";
-import { DivDefinition } from "./dom";
+import { Styles, convertNumericStylesToPixels } from "./style";
 
-export const collapseElementHeight = (
-  node: HTMLElement,
-  time: number,
-  removeNodeAfter = false
+//this module allows using numbers for properties for animation
+//also in case I will be using unit tests with jest, I can mock animations more easily if it is extracted
+
+export const animate = (
+  element: HTMLElement,
+  //I'm using my plain styles here, even thought Keyframe has three additional properies
+  // like CompositeOperationOrAuto, but sinse I'm not using them and do not forsee usage, I won't add them into types
+  // future me - please add type union if you are going to use config for each frame
+  frames: Styles[] | Styles,
+  options: KeyframeAnimationOptions
 ) => {
-  node.style.height = node.offsetHeight + "px";
-  clearPendingTimeouts(node);
-
-  setTimeout(() => {
-    node.style.height = "0px";
-    var timeout = setTimeout(() => {
-      if (removeNodeAfter) {
-        node.remove();
-      } else {
-        node.innerHTML = "";
-        node.removeAttribute("data-timeout");
-      }
-    }, time);
-    node.setAttribute("data-timeout", timeout + "");
-
-    //this 20 for setTimeout let's browser to apply height and then transition to a new height
-    // kind of buggy, but if I set 0 no CSS animation happends
-    // tried to use requestAnimationFrame without any success
-    // need to think on this, maybe use WebAnimations API
-  }, 20);
-};
-
-export const openElementHeight = (
-  node: HTMLElement,
-  children: string | DivDefinition | DivDefinition[],
-  time: number,
-  getTargetHeightAfterAppend?: () => number
-) => {
-  node.style.height = "0px";
-  var hasClearedTimeout = clearPendingTimeouts(node);
-  if (!hasClearedTimeout) {
-    if (typeof children == "string") node.append(children);
-    else if (Array.isArray(children)) node.appendChild(dom.fragment(children));
-    else node.append(dom.div(children));
-  }
-  setTimeout(() => {
-    node.style.height = getTargetHeightAfterAppend
-      ? getTargetHeightAfterAppend() + "px"
-      : node.scrollHeight + "px";
-    var timeout = setTimeout(() => {
-      node.style.removeProperty("height");
-      node.removeAttribute("data-timeout");
-    }, time);
-    node.setAttribute("data-timeout", timeout + "");
-  }, 20);
-};
-
-export const expandElementHeight = (
-  node: HTMLElement,
-  time: number,
-  targetHeight: number,
-  onDone: () => void
-) => {
-  node.style.height = "0px";
-  clearPendingTimeouts(node);
-  setTimeout(() => {
-    node.style.height = targetHeight + "px";
-    var timeout = setTimeout(() => {
-      node.style.removeProperty("height");
-      node.removeAttribute("data-timeout");
-      onDone();
-    }, time);
-    node.setAttribute("data-timeout", timeout + "");
-  }, 20);
-};
-
-export const clearPendingTimeouts = (node: HTMLElement): boolean => {
-  const timeout = node.dataset.timeout;
-  if (timeout) {
-    clearTimeout(parseInt(timeout));
-    node.removeAttribute("data-timeout");
-  }
-  return !!timeout;
+  const convertedStyles = Array.isArray(frames)
+    ? frames.map(convertNumericStylesToPixels)
+    : convertNumericStylesToPixels(frames);
+  return element.animate(convertedStyles as any, options);
 };

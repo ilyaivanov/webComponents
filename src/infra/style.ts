@@ -1,5 +1,6 @@
 import { colors } from ".";
 import { ClassName } from "./keys";
+import * as CSS from "csstype";
 
 const s = document.createElement("style");
 document.head.appendChild(s);
@@ -86,4 +87,32 @@ export const styles = {
     ${width ? "width: " + width + "px" : ""}
     ${height ? "height: " + height + "px" : ""}
   }`,
+};
+
+export type Styles = CSS.Properties<string | number>;
+
+//I'm using whitelist approach
+//in other words I add px to every number values expect 'opacity', 'flex' and other
+//and I'm leaving zeros for any value as string without px postfix
+const whitelist: Styles = {
+  zIndex: 1,
+  opacity: 1,
+  flex: 1,
+  fontWeight: 1,
+};
+export const convertNumericStylesToPixels = (
+  s: Styles
+): Partial<CSSStyleDeclaration> => {
+  let res: any = {};
+  const sCo = s as any;
+  Object.keys(s).forEach((key) => {
+    if (
+      typeof sCo[key] == "string" ||
+      !!(whitelist as any)[key] ||
+      sCo[key] === 0
+    )
+      res[key] = sCo[key] + "";
+    else res[key] = sCo[key] + "px";
+  });
+  return res;
 };
