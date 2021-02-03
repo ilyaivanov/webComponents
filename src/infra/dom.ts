@@ -7,7 +7,7 @@ export type EventsDefinition = {
 export type DivDefinition = {
   id?: string;
   className?: ClassName | (ClassName | undefined)[];
-  children?: DivDefinition | DivDefinition[] | string;
+  children?: DivDefinition | DivDefinition[] | string | HTMLElement;
   style?: Partial<CSSStyleDeclaration>;
 
   attributes?: any;
@@ -45,9 +45,9 @@ export const div = (divDefinition: DivDefinition): HTMLElement => {
       });
     } else if (typeof children == "string") {
       elem.textContent = children;
-    } else {
-      elem.appendChild(div(children));
-    }
+    } else if (isHtmlElement(children)) {
+      elem.appendChild(children);
+    } else elem.appendChild(div(children));
   }
 
   if (divDefinition.id) elem.id = divDefinition.id;
@@ -72,9 +72,12 @@ export const div = (divDefinition: DivDefinition): HTMLElement => {
   return elem as HTMLElement;
 };
 
-export const fragment = (nodes: DivDefinition[]) => {
+export const fragment = (nodes: (DivDefinition | HTMLElement)[]) => {
   const fragment = document.createDocumentFragment();
-  nodes.forEach((node) => fragment.appendChild(div(node)));
+  nodes.forEach((node) => {
+    if (isHtmlElement(node)) fragment.appendChild(node);
+    else fragment.appendChild(div(node));
+  });
   return fragment;
 };
 
@@ -171,3 +174,6 @@ export const removeClassFromElementById = (
 };
 
 // export const setChildren = (node: HTMLElement, )
+//naive check to see if node is a read dom node
+const isHtmlElement = (node: any): node is HTMLElement =>
+  typeof node.getAnimations == "function";

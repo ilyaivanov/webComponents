@@ -72,7 +72,7 @@ export const expandElementHeight = (
   }, 20);
 };
 
-const clearPendingTimeouts = (node: HTMLElement): boolean => {
+export const clearPendingTimeouts = (node: HTMLElement): boolean => {
   const timeout = node.dataset.timeout;
   if (timeout) {
     clearTimeout(parseInt(timeout));

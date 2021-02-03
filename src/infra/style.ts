@@ -34,6 +34,7 @@ export const cssTag = (
   elementName: keyof HTMLElementTagNameMap,
   props: Partial<CSSStyleDeclaration>
 ) => (s.innerHTML += cssToString(elementName, props));
+
 const formatStyle = (selector: string, body: string) =>
   `${selector}{
   ${body}
