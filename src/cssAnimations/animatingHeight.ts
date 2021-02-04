@@ -1,4 +1,4 @@
-import { cls, dom } from "../infra";
+import { cls, DivDefinition, dom } from "../infra";
 import { cssTag, styles, cssClass } from "../infra/style";
 
 cssTag("body", {
@@ -51,24 +51,21 @@ export const init = () => {
   );
 };
 
-const createBox = (): HTMLElement => {
-  const box = dom.div({
-    id: "box1",
+const createBox = (): DivDefinition => ({
+  id: "box1",
+  style: {
+    paddingBottom: isInitiallyVisible ? width : "0",
+  },
+  className: cls.box,
+  children: {
     style: {
-      paddingBottom: isInitiallyVisible ? width : "0",
+      ...styles.overlay,
+      ...styles.flexCenter,
+      textAlign: "center",
     },
-    className: cls.box,
-    children: {
-      style: {
-        ...styles.overlay,
-        ...styles.flexCenter,
-        textAlign: "center",
-      },
-      children: "Box with some text",
-    },
-  });
-  return box;
-};
+    children: "Box with some text",
+  },
+});
 
 const animateBox = (elem: HTMLElement) => {
   const expandBox = () => animateHeight(elem, 0, getExpandedHeight(elem));

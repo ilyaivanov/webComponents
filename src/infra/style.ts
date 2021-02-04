@@ -1,70 +1,71 @@
 import { colors } from ".";
 import { ClassName } from "./keys";
+import * as dom from "./dom";
 import * as CSS from "csstype";
+export type Styles = CSS.Properties<string | number>;
 
 const s = document.createElement("style");
 document.head.appendChild(s);
 
-export const cssClass = (
-  clas: ClassName,
-  styles: Partial<CSSStyleDeclaration>
-) => {
+export const cssClass = (clas: ClassName, styles: Styles) => {
   const text = cssToString("." + clas, styles);
   s.innerHTML += text;
-  return text;
 };
-export const css = (
-  selector: string | string[],
-  styles: Partial<CSSStyleDeclaration>
-) => {
+
+export const cssClassOnHover = (clas: ClassName, styles: Styles) => {
+  const text = cssToString("." + clas + ":hover", styles);
+  s.innerHTML += text;
+};
+
+export const css = (selector: string | string[], styles: Styles) => {
   const res = Array.isArray(selector) ? selector.join(", ") : selector;
   const text = cssToString(res, styles);
   s.innerHTML += text;
-  return text;
 };
-const cssToString = (selector: string, props: Partial<CSSStyleDeclaration>) => {
-  const div = document.createElement("div");
-  Object.assign(div.style, props);
-  return formatStyle(selector, div.style.cssText);
-};
+
+export const cssTag = (
+  elementName: keyof HTMLElementTagNameMap,
+  props: Styles
+) => (s.innerHTML += cssToString(elementName, props));
 
 export const cssText = (text: string) => {
   s.innerHTML += text;
 };
-export const cssTag = (
-  elementName: keyof HTMLElementTagNameMap,
-  props: Partial<CSSStyleDeclaration>
-) => (s.innerHTML += cssToString(elementName, props));
 
-const formatStyle = (selector: string, body: string) =>
-  `${selector}{
-  ${body}
-}
-`;
+const cssToString = (selector: string, props: Styles) => {
+  const div = document.createElement("div");
+  Object.assign(div.style, convertNumericStylesToPixels(props));
+  return `${selector} {
+    ${div.style.cssText}
+  }
+  `;
+};
 
 export const styles = {
   flexCenter: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-  },
+  } as const,
   overlay: {
     position: "absolute",
     top: "0",
     left: "0",
     right: "0",
     bottom: "0",
-  },
-  absoluteTopRight: (top: number, right: number) => ({
-    position: "absolute",
-    top: top + "px",
-    right: right + "px",
-  }),
-  absoluteTopLeft: (top: number, left: number) => ({
-    position: "absolute",
-    top: top + "px",
-    left: left + "px",
-  }),
+  } as const,
+  absoluteTopRight: (top: number, right: number) =>
+    ({
+      position: "absolute",
+      top: top + "px",
+      right: right + "px",
+    } as const),
+  absoluteTopLeft: (top: number, left: number) =>
+    ({
+      position: "absolute",
+      top: top + "px",
+      left: left + "px",
+    } as const),
   rotate: (deg: number) => ({
     transform: `rotateZ(${deg}deg)`,
   }),
@@ -87,9 +88,13 @@ export const styles = {
     ${width ? "width: " + width + "px" : ""}
     ${height ? "height: " + height + "px" : ""}
   }`,
-};
+  //this variable is used to set maxHeight for cards
+  setPlayerHeightRootVariable: (height: number) =>
+    dom.root.style.setProperty("--player-height", `${height}px`),
 
-export type Styles = CSS.Properties<string | number>;
+  cancelAllCurrentAnimations: (elem: HTMLElement) =>
+    elem.getAnimations().forEach((a) => a.cancel()),
+};
 
 //I'm using whitelist approach
 //in other words I add px to every number values expect 'opacity', 'flex' and other

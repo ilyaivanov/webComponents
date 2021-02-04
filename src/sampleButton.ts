@@ -1,4 +1,5 @@
-import { convertNumericStylesToPixels, Styles, anim } from "./infra";
+import { anim } from "./infra";
+import { convertNumericStylesToPixels, Styles } from "./infra/style";
 
 const s: Styles = {
   height: 100,
