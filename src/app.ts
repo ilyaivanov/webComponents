@@ -1,7 +1,5 @@
-// import { init } from "./svgMapCanvas";
-// import { init } from "./cssAnimations/animatingHeight";
-// init();
+const root = document.getElementById("root");
 
-import * as sampleButton from "./sampleButton";
+if (!root) throw new Error("Can't find root element");
 
-sampleButton.render();
+root.append("fo42oo");
