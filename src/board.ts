@@ -1,61 +1,59 @@
+import defaultBoard from "./defaultBoard";
 import { cls, css, div, img, span, fragment } from "./infra";
 
 class Board extends HTMLElement {
-  getCardImageSrc = (videoId: string): string =>
-    `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+  getImageSrc = (item: Item): string => {
+    if (item.type === "playlist") return item.image;
+    else return `https://i.ytimg.com/vi/${item.videoId}/mqdefault.jpg`;
+  };
 
-  renderCard = () =>
-    div(
+  renderCard = (item: Item) => {
+    const card = div(
       { className: cls.card },
       img({
-        src: this.getCardImageSrc("9D2R69gVyZ0"),
+        src: this.getImageSrc(item),
         className: cls.cardImage,
       }),
-      span({ className: cls.cardText }, "TOOL - 7empest (Audio)")
+      span({ className: cls.cardText }, item.name)
+    );
+    card.addEventListener("mousedown", (e) => {
+      this.dispatchEvent(
+        new CustomEvent("card-mousedown", {
+          detail: { card, item, point: { x: e.screenX, y: e.screenY } },
+        })
+      );
+    });
+    return card;
+  };
+
+  renderColumn = (column: Column) => {
+    const col = div(
+      { className: cls.column },
+      div({ className: cls.columnTitle }, column.name)
     );
 
-  renderColumn = () => {
-    const column = div(
-      { className: cls.column },
-      div({ className: cls.columnTitle }, "Column 12"),
-      this.renderCard(),
-      this.renderCard(),
-      this.renderCard(),
-      this.renderCard(),
-      this.renderCard()
-    );
-    return column;
+    col.appendChild(fragment(column.items.map(this.renderCard)));
+    return col;
   };
   connectedCallback() {
+    const board = defaultBoard;
     this.classList.add(cls.board);
 
-    const columns = fragment([
-      this.renderColumn(),
-      this.renderColumn(),
-      this.renderColumn(),
-      this.renderColumn(),
-      this.renderColumn(),
-      this.renderColumn(),
-      this.renderColumn(),
-    ]);
+    const columns = fragment(board.columns.map(this.renderColumn));
 
     this.appendChild(columns);
     this.appendChild(div({ className: cls.boardSpacing }));
   }
 }
 
-export const viewBoard = ({ onScroll }: { onScroll: (e: Event) => void }) => {
-  const board = document.createElement("slapstuk-board");
-  board.addEventListener("scroll", onScroll);
-  return board;
-};
+export const viewBoard = () => document.createElement("slapstuk-board");
+
 const COLUMN_SPACING = 20;
 css.class(cls.board, {
   display: "flex",
   flexDirection: "row",
   gridArea: "board",
-  overflowX: "auto",
-  marginBottom: 5,
+  overflowX: "overlay" as any,
 });
 
 css.selector(`.${cls.board}::-webkit-scrollbar`, {
@@ -74,10 +72,17 @@ css.class(cls.column, {
   flexDirection: "column",
   width: 280,
   minWidth: 280,
-  marginTop: 10,
+  paddingTop: 10,
+  overflowY: "overlay" as any,
   paddingLeft: COLUMN_SPACING,
   paddingRight: COLUMN_SPACING,
   borderRight: "1px solid rgba(255,255,255,0.5)",
+});
+css.selector(`.${cls.column}::-webkit-scrollbar`, {
+  width: 10,
+});
+css.selector(`.${cls.column}::-webkit-scrollbar-thumb`, {
+  background: "rgba(255,255,255,0.5)",
 });
 
 css.class(cls.columnTitle, {
@@ -88,7 +93,7 @@ css.class(cls.columnTitle, {
 });
 
 //CARD
-const CARD_HEIGHT = 40;
+const CARD_HEIGHT = 50;
 const CARD_VERTICAL_DISTANCE = 15;
 const CARD_TEXT_FONT_SIZE = 14;
 css.class(cls.card, {
@@ -97,6 +102,7 @@ css.class(cls.card, {
   alignItems: "center",
   marginBottom: CARD_VERTICAL_DISTANCE,
   backgroundColor: "white",
+  minHeight: CARD_HEIGHT,
   height: CARD_HEIGHT,
   borderRadius: 4,
   overflow: "hidden",
